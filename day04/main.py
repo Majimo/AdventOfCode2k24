@@ -10,45 +10,34 @@ def find_horizontal_occurences(lines) -> bool:
             occurence += 1
     return occurence
 
-def find_vertical_occurences(lines, rows, cols, word):
-    vertical_count = 0
+def make_col_to_string(lines, rows, cols) -> list[str]:
+    col_to_string = []
     for col in range(cols):
-        for row in range(rows - 3):
-            if all(lines[row + i][col] == word[i] for i in range(4)):
-                vertical_count += 1
-        for row in range(3, rows):
-            if all(lines[row - i][col] == word[i] for i in range(4)):
-                vertical_count += 1
-    return vertical_count
+        col_to_string.append("".join([lines[row][col] for row in range(rows)]))
+    return col_to_string
+
+def make_diagonal_to_string(lines, rows, cols) -> list[str]:
+    diagonal_to_string = []
+    for row in range(rows):
+        for col in range(cols):
+            try:
+                diagonal_to_string.append("".join([lines[row + i][col + i] for i in range(4)]))
+            except IndexError:
+                pass
+    # Partir de la dernière ligne et remonter
+    for row in range(rows - 1, 0, -1):
+        for col in range(cols):
+            try:
+                diagonal_to_string.append("".join([lines[row - i][col + i] for i in range(4)]))
+            except IndexError:
+                pass
+    return diagonal_to_string
+
+def find_vertical_occurences(lines, rows, cols, word):
+    return find_horizontal_occurences(make_col_to_string(lines, rows, cols))
 
 def find_diagonal_occurrences(lines, rows, cols, word):
-    diagonal_count = 0
-    for row in range(rows - 3):
-        for col in range(cols - 3):
-            found_word = lines[row][col] + lines[row + 1][col + 1] + lines[row + 2][col + 2] + lines[row + 3][col + 3]
-            if found_word == word:
-                diagonal_count += 1
-            if found_word == "SAMX":
-                diagonal_count += 1
-    
-    for row in range(rows - 3):
-        for col in range(3, cols):
-            found_word = lines[row][col] + lines[row - 1][col - 1] + lines[row - 2][col - 2] + lines[row - 3][col - 3]
-            if found_word == word:
-                diagonal_count += 1
-            if found_word == "SAMX":
-                diagonal_count += 1
-
-    # Faire colonne max en revenant sur les rows
-    for row in range(rows - 3, rows):
-        for col in range(3, cols - 3):
-            found_word = lines[row][col] + lines[row - 1][col + 1] + lines[row - 2][col + 2] + lines[row - 3][col + 3]
-            if found_word == word:
-                diagonal_count += 1
-            if found_word == "SAMX":
-                diagonal_count += 1
-
-    return diagonal_count
+    return find_horizontal_occurences(make_diagonal_to_string(lines, rows, cols))
 
 def find_xmas(lines):
     count = 0
